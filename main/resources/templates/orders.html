@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Orders | Ceylon Music House</title>
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+</head>
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-name">Ceylon Music House</span>
+            <span class="brand-sub">Fine Instruments &amp; Sound</span>
+        </a>
+        <nav class="header-nav">
+            <a th:href="@{/}">Home</a>
+            <a th:href="@{/products}">Shop</a>
+            <a th:href="@{/orders}" class="active">Orders</a>
+            <a th:href="@{/wishlist}">Wishlist</a>
+            <a th:href="@{/complaints}">Support</a>
+            <a class="cart-badge" th:href="@{/cart}">Cart</a>
+        </nav>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+            <a th:if="${role != null and role != 'CUSTOMER'}" th:href="@{/admin/dashboard}" class="btn btn-outline btn-sm">Dashboard</a>
+            <a th:href="@{/profile}" class="btn btn-outline btn-sm">My Profile</a>
+            <form th:action="@{/logout}" method="post" style="display:inline;margin:0;"><button type="submit" class="btn-logout">Logout</button></form>
+        </div>
+    </div>
+</header>
+
+<div class="main">
+    <div class="container">
+        <div class="page-header">
+            <div><div class="page-title">My Orders</div></div>
+        </div>
+
+        <div class="panel" th:if="${#lists.isEmpty(orders)}">
+            <div class="panel-body" style="text-align:center;">
+                <p>You haven't placed any orders yet.</p>
+            </div>
+        </div>
+
+        <div class="panel" th:unless="${#lists.isEmpty(orders)}">
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Date</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="o : ${orders}">
+                        <td class="muted" th:text="'#' + ${o.orderId}">#1</td>
+                        <td th:text="${#dates.format(o.orderDate, 'dd MMM yyyy, HH:mm')}">Date</td>
+                        <td class="primary" th:text="'$' + ${o.totalAmount}">$0.00</td>
+                        <td><span class="pill" th:classappend="'pill-' + ${o.status}" th:text="${o.status}">PENDING</span></td>
+                        <td><a th:href="@{/orders/{id}(id=${o.orderId})}" class="btn btn-outline btn-sm">View</a></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-links">
+        <a th:href="@{/terms}">Terms &amp; Conditions</a>
+        <a th:href="@{/privacy}">Privacy Policy</a>
+        <a th:href="@{/contact}">Contact &amp; Support</a>
+    </div>
+    <div class="copyright">&copy; 2026 Ceylon Music House — The Home of Music. All Rights Reserved.</div>
+</footer>
+
+</body>
+</html>

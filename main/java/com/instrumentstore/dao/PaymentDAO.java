@@ -42,6 +42,13 @@ public class PaymentDAO {
         return results.isEmpty() ? null : results.get(0);
     }
 
+    // READ: one payment by its own id
+    public Payment getById(int paymentId) {
+        String sql = "SELECT * FROM payments WHERE payment_id = ?";
+        List<Payment> results = jdbcTemplate.query(sql, paymentRowMapper, paymentId);
+        return results.isEmpty() ? null : results.get(0);
+    }
+
     // READ: all payments (admin)
     public List<Payment> getAllPayments() {
         String sql = "SELECT * FROM payments ORDER BY paid_at DESC";

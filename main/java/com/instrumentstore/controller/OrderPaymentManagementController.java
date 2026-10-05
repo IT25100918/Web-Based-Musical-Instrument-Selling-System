@@ -8,7 +8,9 @@ import com.instrumentstore.model.Order;
 import com.instrumentstore.model.OrderItem;
 import com.instrumentstore.model.Payment;
 import com.instrumentstore.model.User;
+import com.instrumentstore.service.BusinessException;
 import com.instrumentstore.service.OrderService;
+import com.instrumentstore.service.StatusRules;
 import com.instrumentstore.service.payment.PaymentProcessor;
 import com.instrumentstore.service.payment.PaymentProcessorFactory;
 import jakarta.servlet.http.HttpSession;
@@ -140,16 +142,19 @@ public class OrderPaymentManagementController {
         if (status.equals(order.getStatus())) {
             return "redirect:/admin/orders";
         }
-        // A cancelled order has already given its stock back (and been refunded), so it is final.
-        if ("CANCELLED".equals(order.getStatus())) {
-            redirectAttributes.addFlashAttribute("error", "Order #" + id + " is cancelled and can't be changed.");
+        // Only the changes listed in StatusRules are allowed (e.g. no PENDING -> DELIVERED, and a
+        // cancelled order is final because it has already given its stock back and been refunded).
+        if (!StatusRules.canChangeOrder(order.getStatus(), status)) {
+            redirectAttributes.addFlashAttribute("error",
+                    "Order #" + id + " can't change from " + order.getStatus() + " to " + status + ".");
             return "redirect:/admin/orders";
         }
 
         if ("CANCELLED".equals(status)) {
             orderService.cancelOrder(id, false); // restocks + refunds
-        } else {
-            orderDAO.updateStatus(id, status);
+        } else if (!orderDAO.transitionStatus(id, order.getStatus(), status)) {
+            // someone else changed the order between loading it and saving
+            redirectAttributes.addFlashAttribute("error", "Order #" + id + " was changed by someone else. Please try again.");
         }
         return "redirect:/admin/orders";
     }
@@ -208,13 +213,17 @@ public class OrderPaymentManagementController {
             return "payment";
         }
 
-        String transactionRef = processor.process(order.getTotalAmount(), orderId);
         try {
-            // One transaction: PENDING -> PROCESSING and the payment record. Fails if the order was
-            // already paid or has been cancelled (which used to resurrect cancelled orders).
-            orderService.payOrder(orderId, order.getTotalAmount(), processor.getMethodName(), transactionRef);
-        } catch (OrderService.OrderException e) {
+            // One transaction: PENDING -> PROCESSING, the processor charges, the payment is recorded.
+            // Fails if the order was already paid or cancelled; if the processor itself throws,
+            // the status change is rolled back too.
+            orderService.payOrder(orderId, order.getTotalAmount(), processor);
+        } catch (BusinessException e) {
             return "redirect:/orders/" + orderId;
+        } catch (RuntimeException e) {
+            model.addAttribute("order", order);
+            model.addAttribute("error", "The payment could not be processed. You have not been charged - please try again.");
+            return "payment";
         }
 
         return "redirect:/payment/" + orderId + "/receipt";
@@ -261,26 +270,41 @@ public class OrderPaymentManagementController {
         return "admin-payments";
     }
 
-    // POST /admin/payments/{id}/status -> generic status change (SUCCESS, FAILED, REFUNDED)
+    // POST /admin/payments/{id}/status -> manual status change (rules live in OrderService.changePaymentStatus)
     @PostMapping("/admin/payments/{id}/status")
-    public String updatePaymentStatus(@PathVariable int id, @RequestParam String status) {
-        if (VALID_PAYMENT_STATUSES.contains(status)) { // an unknown value would violate the DB CHECK constraint (HTTP 500)
-            paymentDAO.updateStatus(id, status);
+    public String updatePaymentStatus(@PathVariable int id, @RequestParam String status,
+                                       RedirectAttributes redirectAttributes) {
+        if (!VALID_PAYMENT_STATUSES.contains(status)) { // an unknown value would violate the DB CHECK constraint (HTTP 500)
+            redirectAttributes.addFlashAttribute("error", "Unknown payment status.");
+            return "redirect:/admin/payments";
+        }
+        try {
+            orderService.changePaymentStatus(id, status);
+        } catch (BusinessException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/payments";
     }
 
-    // POST /admin/payments/{id}/refund
+    // POST /admin/payments/{id}/refund -> refunds through the order, so order status and stock stay correct
     @PostMapping("/admin/payments/{id}/refund")
-    public String refundPayment(@PathVariable int id) {
-        paymentDAO.refund(id);
+    public String refundPayment(@PathVariable int id, RedirectAttributes redirectAttributes) {
+        try {
+            orderService.refundPayment(id);
+        } catch (BusinessException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/admin/payments";
     }
 
-    // POST /admin/payments/{id}/delete -> remove an invalid record
+    // POST /admin/payments/{id}/delete -> remove an invalid (FAILED / PENDING) record only
     @PostMapping("/admin/payments/{id}/delete")
-    public String deletePayment(@PathVariable int id) {
-        paymentDAO.deletePayment(id);
+    public String deletePayment(@PathVariable int id, RedirectAttributes redirectAttributes) {
+        try {
+            orderService.deleteInvalidPayment(id);
+        } catch (BusinessException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/admin/payments";
     }
 
