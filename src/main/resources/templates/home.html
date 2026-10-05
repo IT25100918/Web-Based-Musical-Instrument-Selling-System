@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ceylon Music House — The Home of Music</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Work+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --paper:      #EDE6D6;
+            --paper-dim:  #E2D9C6;
+            --ink:        #241E19;
+            --ink-soft:   #5B5347;
+            --rosewood:   #16110D;
+            --rosewood-2: #1F1811;
+            --brass:      #A8763E;
+            --brass-lt:   #C89A5E;
+            --sage:       #5C6957;
+            --danger:     #A83B2E;
+            --cream-line: rgba(237,230,214,0.14);
+            --ink-line:   rgba(36,30,25,0.12);
+            --radius: 2px;
+        }
+        *{box-sizing:border-box; margin:0; padding:0;}
+        html{scroll-behavior:smooth;}
+        body{
+            background:var(--paper);
+            color:var(--ink);
+            font-family:'Work Sans', sans-serif;
+            font-weight:400;
+            -webkit-font-smoothing:antialiased;
+            overflow-x:hidden;
+        }
+        a{color:inherit; text-decoration:none;}
+        .eyebrow{
+            font-family:'JetBrains Mono', monospace;
+            font-size:11px;
+            letter-spacing:0.22em;
+            text-transform:uppercase;
+        }
+        img{max-width:100%; display:block;}
+
+        /* ---------- HEADER ---------- */
+        header{
+            position:sticky; top:0; z-index:100;
+            display:flex; align-items:center; justify-content:space-between;
+            padding:22px 5vw;
+            background:rgba(237,230,214,0.0);
+            backdrop-filter:blur(0px);
+            transition:background 0.4s ease, backdrop-filter 0.4s ease, padding 0.4s ease, border-color .4s ease;
+            border-bottom:1px solid transparent;
+        }
+        header.scrolled{
+            background:rgba(237,230,214,0.92);
+            backdrop-filter:blur(10px);
+            padding:14px 5vw;
+            border-bottom:1px solid var(--ink-line);
+        }
+        .logo{
+            font-family:'Fraunces', serif;
+            font-weight:500;
+            font-size:1.35rem;
+            letter-spacing:0.01em;
+            display:flex; flex-direction:column; line-height:1;
+            color:var(--paper);
+            transition:color .4s ease;
+        }
+        header.scrolled .logo{ color:var(--ink); }
+        .logo .brand-sub{
+            font-family:'JetBrains Mono', monospace;
+            font-size:0.5rem; letter-spacing:0.3em; text-transform:uppercase;
+            color:var(--brass-lt); margin-top:4px; font-weight:500;
+        }
+        header.scrolled .logo .brand-sub{ color:var(--brass); }
+        .logo em{font-style:italic; color:var(--brass); font-weight:400;}
+        nav{display:flex; gap:2.2rem; align-items:center;}
+        nav a{
+            font-size:13px;
+            letter-spacing:0.06em;
+            text-transform:uppercase;
+            position:relative;
+            padding-bottom:4px;
+            color:rgba(237,230,214,0.75);
+            transition:color .3s ease;
+        }
+        header.scrolled nav a{ color:var(--ink-soft); }
+        nav a:hover, nav a.active{ color:var(--brass-lt); }
+        header.scrolled nav a:hover, header.scrolled nav a.active{ color:var(--brass); }
+        nav a::after{
+            content:'';
+            position:absolute; left:0; bottom:0;
+            width:0; height:1px; background:var(--brass);
+            transition:width .35s ease;
+        }
+        nav a:hover::after, nav a.active::after{width:100%;}
+        .header-actions{display:flex; align-items:center; gap:1rem;}
+        .btn{
+            font-family:'JetBrains Mono', monospace;
+            font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
+            padding:12px 26px;
+            border:1px solid var(--ink);
+            border-radius:var(--radius);
+            transition:all .3s ease;
+            white-space:nowrap;
+            display:inline-block;
+            cursor:pointer;
+        }
+        .btn:hover{background:var(--ink); color:var(--paper);}
+        .btn-solid{ background:var(--brass); border-color:var(--brass); color:#171310;}
+        .btn-solid:hover{ background:var(--brass-lt); border-color:var(--brass-lt); color:#171310;}
+        .btn-ghost-dark{border-color:var(--cream-line); color:var(--paper);}
+        .btn-ghost-dark:hover{background:var(--paper); color:var(--rosewood);}
+        .btn-sm{ padding:8px 16px; font-size:10px; }
+        .btn-text{ font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--danger); }
+
+        @media (max-width:860px){
+            nav{display:none;}
+        }
+
+        /* ---------- THE STRING (signature element) ---------- */
+        #the-string{
+            position:fixed;
+            left:0; top:0;
+            width:100%; height:100%;
+            pointer-events:none;
+            z-index:5;
+        }
+        #the-string svg{width:100%; height:100%;}
+        #the-string path{
+            stroke:var(--brass-lt);
+            stroke-width:1.1;
+            fill:none;
+            opacity:0.55;
+        }
+
+        /* ---------- HERO ---------- */
+        .hero{
+            position:relative;
+            min-height:92svh;
+            background:var(--rosewood);
+            color:var(--paper);
+            display:flex; flex-direction:column; justify-content:center;
+            padding:0 5vw;
+            overflow:hidden;
+            margin-top:-90px;
+        }
+        .hero::before{
+            content:'';
+            position:absolute; inset:0;
+            background:
+                    radial-gradient(ellipse 60% 50% at 80% 15%, rgba(168,118,62,0.14), transparent 60%),
+                    radial-gradient(ellipse 50% 40% at 10% 90%, rgba(92,105,87,0.10), transparent 60%);
+            pointer-events:none;
+        }
+        .hero-inner{ padding-top:90px; position:relative; }
+        .hero-eyebrow{
+            color:var(--brass-lt);
+            margin-bottom:2.2rem;
+            display:flex; align-items:center; gap:14px;
+        }
+        .hero-eyebrow .rule{width:40px; height:1px; background:var(--brass-lt);}
+        .hero h1{
+            font-family:'Fraunces', serif;
+            font-weight:500;
+            font-size:clamp(2.6rem, 6.6vw, 5.6rem);
+            line-height:1;
+            letter-spacing:-0.01em;
+            max-width:16ch;
+        }
+        .hero h1 .line2{
+            display:block;
+            font-style:italic;
+            font-weight:400;
+            color:var(--paper-dim);
+            font-size:0.62em;
+            margin:0.35em 0;
+        }
+        .hero p.sub{
+            margin-top:2.4rem;
+            max-width:42ch;
+            font-size:1.05rem;
+            line-height:1.65;
+            color:rgba(237,230,214,0.72);
+        }
+        .hero-actions{
+            margin-top:3rem;
+            display:flex; gap:1rem; flex-wrap:wrap;
+        }
+        .hero-foot{
+            position:absolute; bottom:2.4rem; left:5vw; right:5vw;
+            display:flex; justify-content:space-between; align-items:flex-end;
+            color:rgba(237,230,214,0.55);
+        }
+        .hero-foot .measure{
+            font-family:'JetBrains Mono', monospace;
+            font-size:10.5px; letter-spacing:0.18em; text-transform:uppercase;
+        }
+        .scroll-cue{
+            writing-mode:vertical-rl;
+            font-family:'JetBrains Mono', monospace;
+            font-size:10.5px; letter-spacing:0.2em; text-transform:uppercase;
+            display:flex; align-items:center; gap:10px;
+            color:rgba(237,230,214,0.55);
+        }
+        .scroll-cue .drop{width:1px; height:38px; background:linear-gradient(var(--brass-lt), transparent);}
+
+        @media (max-width:640px){
+            .hero-foot{flex-direction:column; align-items:flex-start; gap:1.5rem; position:static; margin-top:3.5rem;}
+            .hero{padding-bottom:3rem;}
+        }
+
+        /* ---------- REVEAL ---------- */
+        .reveal{opacity:0; transform:translateY(28px); transition:opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1);}
+        .reveal.in{opacity:1; transform:translateY(0);}
+
+        /* ---------- CATEGORIES (as "process" band) ---------- */
+        .process{
+            padding:7rem 5vw 5rem;
+            max-width:1400px; margin:0 auto;
+        }
+        .section-head{max-width:640px; margin-bottom:3.5rem;}
+        .section-head .eyebrow{color:var(--brass); margin-bottom:1rem;}
+        .section-head h2{
+            font-family:'Fraunces', serif;
+            font-weight:500;
+            font-size:clamp(2rem, 3.6vw, 3rem);
+            line-height:1.05;
+        }
+        .section-head p{
+            margin-top:1.3rem;
+            color:var(--ink-soft);
+            font-size:1.02rem;
+            line-height:1.6;
+            max-width:52ch;
+        }
+        .category-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+            gap:0;
+            border-top:1px solid var(--ink-line);
+            border-left:1px solid var(--ink-line);
+        }
+        .category-tile{
+            padding:2rem 1.6rem;
+            border-right:1px solid var(--ink-line);
+            border-bottom:1px solid var(--ink-line);
+            text-align:center;
+            transition:background .25s ease;
+        }
+        .category-tile:hover{ background:rgba(168,118,62,0.06); }
+        .category-tile .icon{ font-size:2rem; display:block; margin-bottom:1rem; }
+        .category-tile img{ width:44px; height:44px; object-fit:contain; margin:0 auto 1rem; }
+        .category-tile h3{
+            font-family:'Fraunces', serif;
+            font-style:italic;
+            font-weight:400;
+            font-size:1.1rem;
+        }
+        .empty-note{ text-align:center; color:var(--ink-soft); padding:2rem 0; font-family:'Fraunces', serif; font-style:italic; }
+
+        /* ---------- COLLECTION (products) ---------- */
+        .collection{
+            padding:5rem 5vw 6rem;
+            max-width:1400px; margin:0 auto;
+        }
+        .figure-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
+            gap:1.4rem;
+        }
+        .figure{position:relative; overflow:hidden; background:var(--paper-dim); border-radius:var(--radius); aspect-ratio:4/5; display:block;}
+        .figure img{width:100%; height:100%; object-fit:cover; transition:transform 1.1s cubic-bezier(.2,.7,.2,1);}
+        .figure .placeholder{width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:2.6rem;}
+        .figure:hover img{transform:scale(1.045);}
+        .figure .tag{
+            position:absolute; left:1.1rem; right:1.1rem; bottom:1.1rem;
+            color:#fff;
+            font-family:'JetBrains Mono', monospace;
+            font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase;
+            opacity:0; transform:translateY(6px);
+            transition:opacity .4s ease, transform .4s ease;
+        }
+        .figure .tag .name{ display:block; font-size:12.5px; letter-spacing:0.02em; text-transform:none; margin-bottom:2px; font-weight:500;}
+        .figure::after{
+            content:'';
+            position:absolute; inset:0;
+            background:linear-gradient(to top, rgba(20,16,12,0.72), transparent 55%);
+            opacity:0; transition:opacity .4s ease;
+        }
+        .figure:hover::after, .figure:hover .tag{opacity:1; transform:translateY(0);}
+        .figure .flag{
+            position:absolute; top:0.9rem; right:0.9rem; z-index:2;
+            background:rgba(168,59,46,0.88); color:#fff;
+            font-family:'JetBrains Mono', monospace; font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase;
+            padding:3px 9px; border-radius:20px;
+        }
+
+        .collection-foot{
+            margin-top:3rem;
+            display:flex; justify-content:flex-end;
+        }
+
+        /* ---------- QUOTE ---------- */
+        .quote-section{
+            background:var(--rosewood-2);
+            color:var(--paper);
+            padding:7rem 5vw;
+            position:relative;
+        }
+        .quote-wrap{max-width:900px; margin:0 auto; text-align:center;}
+        .quote-wrap svg.mark{margin:0 auto 2rem; opacity:0.5;}
+        blockquote{
+            font-family:'Fraunces', serif;
+            font-style:italic;
+            font-weight:400;
+            font-size:clamp(1.4rem, 2.8vw, 2.1rem);
+            line-height:1.4;
+            color:var(--paper-dim);
+        }
+        .quote-attr{
+            margin-top:2.2rem;
+            font-family:'JetBrains Mono', monospace;
+            font-size:11px; letter-spacing:0.16em; text-transform:uppercase;
+            color:var(--brass-lt);
+        }
+
+        /* ---------- FOOTER ---------- */
+        footer{
+            background:var(--rosewood);
+            color:var(--paper);
+            padding:5rem 5vw 2.2rem;
+        }
+        .footer-grid{
+            max-width:1400px; margin:0 auto;
+            display:grid;
+            grid-template-columns:1.6fr 1fr 1fr 1fr;
+            gap:3rem;
+            padding-bottom:3rem;
+        }
+        .footer-brand .logo{color:var(--paper); margin-bottom:1.2rem;}
+        .footer-brand p{
+            color:rgba(237,230,214,0.6);
+            font-size:0.94rem; line-height:1.65; max-width:32ch;
+        }
+        footer h4{
+            font-family:'JetBrains Mono', monospace;
+            font-size:11px; letter-spacing:0.18em; text-transform:uppercase;
+            color:var(--brass-lt);
+            margin-bottom:1.4rem;
+        }
+        footer ul{list-style:none;}
+        footer li{margin-bottom:0.8rem;}
+        footer li a, footer li span{
+            color:rgba(237,230,214,0.8);
+            font-size:0.94rem;
+            position:relative;
+        }
+        footer li a::after{
+            content:''; position:absolute; left:0; bottom:-2px; width:0; height:1px;
+            background:var(--brass-lt); transition:width .3s ease;
+        }
+        footer li a:hover::after{width:100%;}
+        .footer-bottom{
+            max-width:1400px; margin:0 auto;
+            border-top:1px solid var(--cream-line);
+            padding-top:1.8rem;
+            display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem;
+            font-size:12.5px; color:rgba(237,230,214,0.5);
+        }
+        @media (max-width:860px){
+            .footer-grid{grid-template-columns:1fr 1fr;}
+        }
+        @media (max-width:520px){
+            .footer-grid{grid-template-columns:1fr;}
+        }
+
+        @media (prefers-reduced-motion: reduce){
+            .reveal, .figure img, header, #the-string path{transition:none !important;}
+            .reveal{opacity:1; transform:none;}
+        }
+    </style>
+</head>
+<body>
+
+<div id="the-string" aria-hidden="true">
+    <svg preserveAspectRatio="none" viewBox="0 0 100 1000">
+        <path id="string-path" d="M 96 0 C 60 250, 40 400, 70 600 C 90 750, 30 850, 55 1000" stroke-dasharray="2000" stroke-dashoffset="2000"/>
+    </svg>
+</div>
+
+<header id="site-header">
+    <a class="logo" th:href="@{/}">
+        Ceylon Music House
+        <span class="brand-sub">Fine Instruments &amp; Sound</span>
+    </a>
+    <nav>
+        <a th:href="@{/}" class="active">Home</a>
+        <a th:href="@{/products}">Shop</a>
+        <a th:if="${loggedInUser != null}" th:href="@{/orders}">Orders</a>
+        <a th:if="${loggedInUser != null}" th:href="@{/wishlist}">Wishlist</a>
+            <a th:if="${loggedInUser != null}" th:href="@{/complaints}">Support</a>
+        <a th:href="@{/cart}">Cart</a>
+    </nav>
+    <div class="header-actions">
+        <a th:if="${role != null and role != 'CUSTOMER'}" th:href="@{/admin/dashboard}" class="btn btn-solid btn-sm">Dashboard</a>
+        <a th:if="${loggedInUser == null}" th:href="@{/login}" class="btn btn-solid btn-sm">Sign In</a>
+        <a th:if="${loggedInUser != null}" th:href="@{/profile}" class="btn btn-ghost-dark btn-sm">My Profile</a>
+        <form th:if="${loggedInUser != null}" th:action="@{/logout}" method="post" style="display:inline;margin:0;"><button type="submit" class="btn-text" style="background:none;border:none;font:inherit;cursor:pointer;padding:0;">Logout</button></form>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="hero-inner">
+        <div class="hero-eyebrow eyebrow"><span class="rule"></span> Est. Kandy, Sri Lanka</div>
+        <h1>
+            The instruments
+            <span class="line2">that make the music.</span>
+            Handpicked, checked twice, ready to play.
+        </h1>
+        <p class="sub">Guitars, keyboards, drums and studio gear for players at every level — sourced with care and set up properly before they ever reach you.</p>
+        <div class="hero-actions">
+            <a class="btn btn-solid" th:href="@{/products}">Shop Now</a>
+            <a class="btn btn-ghost-dark" href="#categories">Browse Categories</a>
+        </div>
+    </div>
+    <div class="hero-foot">
+        <span class="measure">Trusted by Musicians Across Sri Lanka</span>
+        <div class="scroll-cue"><div class="drop"></div>Scroll</div>
+        <span class="measure">Store Pickup in Kandy</span>
+    </div>
+</section>
+
+<section class="process" id="categories">
+    <div class="section-head reveal">
+        <div class="eyebrow">The Ceylon Standard</div>
+        <h2>Every instrument, checked twice.</h2>
+        <p>From the moment gear arrives in Kandy to the day it reaches your hands, our team plays, inspects and sets up every piece we sell.</p>
+    </div>
+
+    <div class="category-grid reveal" th:if="${!#lists.isEmpty(categories)}">
+        <a class="category-tile" th:each="c : ${categories}" th:href="@{/products(categoryId=${c.categoryId})}"
+           th:with="lname=${#strings.toLowerCase(c.name)}">
+            <img class="icon" th:if="${c.imageUrl != null and !c.imageUrl.isEmpty()}" th:src="@{${c.imageUrl}}" th:alt="${c.name}">
+            <span th:unless="${c.imageUrl != null and !c.imageUrl.isEmpty()}" class="icon"
+                  th:text="${#strings.contains(lname,'string') or #strings.contains(lname,'guitar') or #strings.contains(lname,'bass')} ? '🎸' :
+                     (${#strings.contains(lname,'percuss') or #strings.contains(lname,'drum')} ? '🥁' :
+                     (${#strings.contains(lname,'key') or #strings.contains(lname,'piano')} ? '🎹' :
+                     (${#strings.contains(lname,'wind') or #strings.contains(lname,'brass') or #strings.contains(lname,'sax')} ? '🎷' :
+                     (${#strings.contains(lname,'audio') or #strings.contains(lname,'mic') or #strings.contains(lname,'sound')} ? '🎤' : '🎵'))))">🎵</span>
+            <h3 th:text="${c.name}">Category</h3>
+        </a>
+    </div>
+    <p class="empty-note" th:if="${#lists.isEmpty(categories)}">Categories will show up here once added.</p>
+</section>
+
+<section class="collection">
+    <div class="section-head reveal">
+        <div class="eyebrow">— Ceylon Music House / Collection</div>
+        <h2>Featured Products.</h2>
+        <p>A rotating set of favourites from the shop floor, picked for tone, feel and value.</p>
+    </div>
+
+    <div class="figure-grid reveal" th:if="${!#lists.isEmpty(featuredProducts)}">
+        <a class="figure" th:each="p : ${featuredProducts}" th:href="@{/products/{id}(id=${p.productId})}">
+            <span class="flag" th:if="${p.stockQuantity <= 0}">Out of Stock</span>
+            <img th:if="${p.imageUrl != null and !p.imageUrl.isEmpty()}" th:src="@{${p.imageUrl}}" th:alt="${p.name}" loading="lazy">
+            <div th:unless="${p.imageUrl != null and !p.imageUrl.isEmpty()}" class="placeholder">&#127929;</div>
+            <span class="tag">
+        <span class="name" th:text="${p.name}">Product name</span>
+        <span th:text="${p.categoryName} + ' · $' + (${p.onPromotion} ? ${p.promoPrice} : ${p.price})">Category · $0.00</span>
+      </span>
+        </a>
+    </div>
+    <p class="empty-note" th:if="${#lists.isEmpty(featuredProducts)}">No products yet — add some from the admin dashboard.</p>
+
+    <div class="collection-foot reveal">
+        <a th:href="@{/products}" class="btn">Explore Full Catalog →</a>
+    </div>
+</section>
+
+<section class="collection" style="padding-top:0;" th:if="${!#lists.isEmpty(trendingProducts)}">
+    <div class="section-head reveal">
+        <div class="eyebrow">— Trending</div>
+        <h2>Trending Gear.</h2>
+        <p>What players in Kandy have been reaching for lately.</p>
+    </div>
+
+    <div class="figure-grid reveal">
+        <a class="figure" th:each="p : ${trendingProducts}" th:href="@{/products/{id}(id=${p.productId})}">
+            <span class="flag" th:if="${p.stockQuantity <= 0}">Out of Stock</span>
+            <img th:if="${p.imageUrl != null and !p.imageUrl.isEmpty()}" th:src="@{${p.imageUrl}}" th:alt="${p.name}" loading="lazy">
+            <div th:unless="${p.imageUrl != null and !p.imageUrl.isEmpty()}" class="placeholder">&#127929;</div>
+            <span class="tag">
+        <span class="name" th:text="${p.name}">Product name</span>
+        <span th:text="${p.categoryName} + ' · $' + (${p.onPromotion} ? ${p.promoPrice} : ${p.price})">Category · $0.00</span>
+      </span>
+        </a>
+    </div>
+</section>
+
+<section class="quote-section" id="quote">
+    <div class="quote-wrap reveal">
+        <svg class="mark" width="40" height="30" viewBox="0 0 40 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 30V17.5C0 7.5 6 1 15 0L16 4C10 5 7 8.5 7 13H15V30H0Z" fill="#C89A5E"/>
+            <path d="M24 30V17.5C24 7.5 30 1 39 0L40 4C34 5 31 8.5 31 13H39V30H24Z" fill="#C89A5E"/>
+        </svg>
+        <blockquote>A good instrument shouldn't get in the way of the music — it should disappear in your hands the moment you pick it up.</blockquote>
+        <div class="quote-attr">— Ranil Peiris, Founder, Ceylon Music House</div>
+    </div>
+</section>
+
+<footer id="footer">
+    <div class="footer-grid">
+        <div class="footer-brand">
+            <div class="logo">Ceylon Music House</div>
+            <p>A family-run instrument store in Kandy, Sri Lanka — guitars, keyboards, drums and studio gear for players at every level.</p>
+        </div>
+        <div>
+            <h4>Shop</h4>
+            <ul>
+                <li><a th:href="@{/products}">All Products</a></li>
+                <li th:if="${loggedInUser != null}"><a th:href="@{/wishlist}">Wishlist</a></li>
+                <li><a th:href="@{/cart}">Cart</a></li>
+                <li th:if="${loggedInUser == null}"><a th:href="@{/login}">Login</a></li>
+                <li th:if="${loggedInUser != null}"><a th:href="@{/orders}">My Orders</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>The Store</h4>
+            <ul>
+                <li><a href="#categories">Categories</a></li>
+                <li><a href="#quote">About Us</a></li>
+                <li><a th:if="${loggedInUser != null}" th:href="@{/profile}">My Profile</a></li>
+                <li><a th:href="@{/terms}">Terms &amp; Conditions</a></li>
+                <li><a th:href="@{/privacy}">Privacy Policy</a></li>
+                <li><a th:href="@{/contact}">Contact &amp; Support</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Visit</h4>
+            <ul>
+                <li><span>Kandy, Sri Lanka</span></li>
+                <li><span>+94 112 595 608</span></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span>&copy; 2026 Ceylon Music House — The Home of Music. All Rights Reserved.</span>
+        <span>handpicked, checked twice, ready to play</span>
+    </div>
+</footer>
+
+<script>
+    // Header solidify on scroll
+    const header = document.getElementById('site-header');
+    window.addEventListener('scroll', () => {
+        header.classList.toggle('scrolled', window.scrollY > 40);
+    }, { passive: true });
+
+    // Reveal on scroll
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    // Signature "string" draws itself in on load, then settles
+    const stringPath = document.getElementById('string-path');
+    const len = stringPath.getTotalLength();
+    stringPath.style.strokeDasharray = len;
+    stringPath.style.strokeDashoffset = len;
+    requestAnimationFrame(() => {
+        stringPath.style.transition = 'stroke-dashoffset 2.2s cubic-bezier(.2,.8,.2,1)';
+        stringPath.style.strokeDashoffset = '0';
+    });
+</script>
+
+</body>
+</html>
