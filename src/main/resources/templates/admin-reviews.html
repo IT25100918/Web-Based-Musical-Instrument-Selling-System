@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Complaints | Admin</title>
+    <title>Reviews | Admin</title>
     <link rel="stylesheet" th:href="@{/css/theme.css}">
 </head>
 <body>
@@ -25,8 +25,8 @@
             <a th:if="${role == 'ADMIN' or role == 'INVENTORY_MANAGER'}" th:href="@{/admin/purchase-orders}">P.O.s</a>
             <a th:if="${role == 'ADMIN' or role == 'DELIVERY_MANAGER'}" th:href="@{/admin/deliveries}">Deliveries</a>
             <a th:if="${role == 'ADMIN' or role == 'CUSTOMER_RELATIONS_MANAGER'}" th:href="@{/admin/customers}">Customers</a>
-            <a th:if="${role == 'ADMIN' or role == 'CUSTOMER_RELATIONS_MANAGER'}" th:href="@{/admin/complaints}" class="active">Complaints</a>
-            <a th:if="${role == 'ADMIN' or role == 'CUSTOMER_RELATIONS_MANAGER'}" th:href="@{/admin/reviews}">Reviews</a>
+            <a th:if="${role == 'ADMIN' or role == 'CUSTOMER_RELATIONS_MANAGER'}" th:href="@{/admin/complaints}">Complaints</a>
+            <a th:if="${role == 'ADMIN' or role == 'CUSTOMER_RELATIONS_MANAGER'}" th:href="@{/admin/reviews}" class="active">Reviews</a>
             <a th:if="${role == 'ADMIN' or role == 'ORDER_PAYMENT_MANAGER'}" th:href="@{/admin/reports/sales}">Sales Report</a>
             <a th:if="${role == 'ADMIN' or role == 'INVENTORY_MANAGER'}" th:href="@{/admin/reports/inventory}">Inventory Report</a>
             <a th:if="${role == 'ADMIN' or role == 'ORDER_PAYMENT_MANAGER'}" th:href="@{/admin/reports/financial}">Financial Report</a>
@@ -41,37 +41,39 @@
 <div class="main">
     <div class="container">
         <div class="page-header">
-            <div><div class="page-title">Complaints &amp; Returns</div></div>
+            <div>
+                <div class="page-title">Review Moderation</div>
+                <div class="page-sub">Every product review, worst-flagged first. Hiding a review removes it from the public product page without deleting it.</div>
+            </div>
         </div>
 
-        <div class="panel" th:if="${#lists.isEmpty(complaints)}">
-            <div class="panel-body" style="text-align:center;"><p>No complaints have been submitted.</p></div>
+        <div class="panel" th:if="${#lists.isEmpty(reviews)}">
+            <div class="panel-body" style="text-align:center;"><p>No reviews have been submitted yet.</p></div>
         </div>
 
-        <div th:each="c : ${complaints}" class="panel" style="margin-bottom:1rem;">
+        <div th:each="r : ${reviews}" class="panel" style="margin-bottom:1rem;">
             <div class="panel-body">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap;">
                     <div>
-                        <div style="font-weight:600;" th:text="${c.subject}">Subject</div>
+                        <div style="font-weight:600;" th:text="${r.productName} + ' — ' + ${r.reviewerName}">Product — Reviewer</div>
                         <div class="muted" style="font-size:0.75rem; margin-top:0.2rem;"
-                             th:text="${c.customerName} + (${c.orderId != null} ? ' • Order #' + ${c.orderId} : '') + ' • ' + ${#dates.format(c.createdAt, 'dd MMM yyyy, HH:mm')}"></div>
+                             th:text="${r.rating} + ' / 5 stars • ' + ${#dates.format(r.updatedAt, 'dd MMM yyyy, HH:mm')}"></div>
                     </div>
-                    <span class="pill" th:classappend="'pill-' + ${c.status}" th:text="${c.status}">OPEN</span>
+                    <div style="display:flex; gap:0.4rem; align-items:center;">
+                        <span th:if="${r.hidden}" class="pill pill-CANCELLED">HIDDEN</span>
+                        <span th:if="${r.flagCount > 0}" class="pill pill-PENDING" th:text="${r.flagCount} + ' FLAG' + (${r.flagCount} > 1 ? 'S' : '')">1 FLAG</span>
+                    </div>
                 </div>
-                <p style="margin:0.75rem 0; line-height:1.6;" th:text="${c.message}">Message</p>
+                <p style="margin:0.75rem 0; line-height:1.6;" th:text="${r.comment}">Comment</p>
 
-                <form th:action="@{/admin/complaints/{id}/respond(id=${c.complaintId})}" method="post"
-                      style="border-top:1px solid var(--border); padding-top:0.9rem; display:flex; flex-direction:column; gap:0.5rem;">
-                    <textarea name="adminResponse" rows="2" class="form-input" placeholder="Write a response to the customer..." th:text="${c.adminResponse}"></textarea>
-                    <div style="display:flex; gap:0.5rem; align-items:center;">
-                        <select name="status" class="filter-select">
-                            <option value="OPEN" th:selected="${c.status == 'OPEN'}">Open</option>
-                            <option value="IN_PROGRESS" th:selected="${c.status == 'IN_PROGRESS'}">In Progress</option>
-                            <option value="RESOLVED" th:selected="${c.status == 'RESOLVED'}">Resolved</option>
-                        </select>
-                        <button type="submit" class="btn btn-primary btn-sm">Save Response</button>
-                    </div>
-                </form>
+                <div style="border-top:1px solid var(--border); padding-top:0.9rem; display:flex; gap:0.5rem;">
+                    <form th:if="${!r.hidden}" th:action="@{/admin/reviews/{id}/hide(id=${r.reviewId})}" method="post">
+                        <button type="submit" class="btn btn-outline btn-sm">Hide Review</button>
+                    </form>
+                    <form th:if="${r.hidden}" th:action="@{/admin/reviews/{id}/unhide(id=${r.reviewId})}" method="post">
+                        <button type="submit" class="btn btn-primary btn-sm">Unhide Review</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
