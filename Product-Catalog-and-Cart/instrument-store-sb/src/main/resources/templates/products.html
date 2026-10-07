@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Browse Instruments | Ceylon Music House</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+    <style>
+        /* ---- Logo palette for this page: deep teal + coral ---- */
+        :root { --cmh-teal:#08272b; --cmh-teal-2:#0f4048; --cmh-coral:#ff7a4d; --cmh-coral-dk:#e8602f; --cmh-mint:#e6f2ee; --cmh-line:#d8e5e1; }
+
+        /* Nav bar */
+        .header { border-bottom: 3px solid var(--cmh-coral); background: rgba(255,255,255,.97); box-shadow: 0 6px 24px rgba(8,39,43,.08); }
+        .header-nav a { color: var(--cmh-teal-2); }
+        .header-nav a:hover, .header-nav a.active { color: var(--cmh-teal); border-bottom-color: var(--cmh-coral); }
+        .header-nav .cart-badge .count { background: var(--cmh-coral); color: var(--cmh-teal); }
+        .header .btn-outline { color: var(--cmh-teal); border-color: var(--cmh-teal); }
+        .header .btn-outline:hover { background: var(--cmh-teal); border-color: var(--cmh-teal); color: #fff; }
+        .btn-logout { color: var(--cmh-teal-2); border-color: var(--cmh-line); }
+        .btn-logout:hover { background: var(--cmh-coral); border-color: var(--cmh-coral); color: var(--cmh-teal); }
+
+        /* Search bar */
+        form.filters { background: var(--cmh-mint); border-color: var(--cmh-line) !important; box-shadow: 0 8px 24px rgba(8,39,43,.06); }
+        .search-box { background: #fff; border: 2px solid var(--cmh-line); }
+        .search-box:focus-within { border-color: var(--cmh-coral); box-shadow: 0 0 0 4px rgba(255,122,77,.18); }
+        .search-box input { color: var(--cmh-teal); }
+        .search-box input::placeholder { color: #6f8588; }
+        .search-box svg { flex: none; width: 20px; height: 20px; stroke: var(--cmh-coral); fill: none; stroke-width: 2.4; stroke-linecap: round; }
+        select.filter-select { background: #fff; border: 2px solid var(--cmh-line); color: var(--cmh-teal); }
+        select.filter-select:focus { border-color: var(--cmh-coral); box-shadow: 0 0 0 4px rgba(255,122,77,.18); }
+        form.filters .btn-primary { background: var(--cmh-coral); border-color: var(--cmh-coral); color: var(--cmh-teal); }
+        form.filters .btn-primary:hover { background: var(--cmh-teal); border-color: var(--cmh-teal); color: var(--cmh-coral); }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-name">Ceylon Music House</span>
+            <span class="brand-sub">Fine Instruments &amp; Sound</span>
+        </a>
+        <nav class="header-nav">
+            <a th:href="@{/}">Home</a>
+            <a th:href="@{/products}" class="active">Shop</a>
+            <a th:if="${loggedInUser != null}" th:href="@{/orders}">Orders</a>
+            <a th:if="${loggedInUser != null}" th:href="@{/wishlist}">Wishlist</a>
+            <a th:if="${loggedInUser != null}" th:href="@{/complaints}">Support</a>
+            <a class="cart-badge" th:href="@{/cart}">Cart</a>
+        </nav>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+            <a th:if="${role != null and role != 'CUSTOMER'}" th:href="@{/admin/dashboard}" class="btn btn-outline btn-sm">Dashboard</a>
+            <a th:if="${loggedInUser == null}" th:href="@{/login}" class="btn btn-outline btn-sm">Sign In</a>
+            <a th:if="${loggedInUser != null}" th:href="@{/profile}" class="btn btn-outline btn-sm">My Profile</a>
+            <form th:if="${loggedInUser != null}" th:action="@{/logout}" method="post" style="display:inline;margin:0;"><button type="submit" class="btn-logout">Logout</button></form>
+        </div>
+    </div>
+</header>
+
+<div class="main">
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <div class="page-title">Browse Instruments</div>
+                <div class="page-sub">Guitars, keyboards, drums &amp; studio gear</div>
+            </div>
+        </div>
+
+        <form th:action="@{/products}" method="get" class="filters" style="border:1px solid var(--border); border-radius:var(--radius); margin-bottom:1.5rem;">
+            <div class="search-box">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                <input type="text" name="keyword" placeholder="Search instruments..." th:value="${param.keyword != null ? param.keyword[0] : ''}">
+            </div>
+            <select name="categoryId" class="filter-select">
+                <option value="">All Categories</option>
+                <option th:each="c : ${categories}" th:value="${c.categoryId}" th:text="${c.name}"
+                        th:selected="${param.categoryId != null and #strings.equals(param.categoryId[0], #strings.toString(c.categoryId))}">Category</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+
+        <div class="product-grid" th:if="${!#lists.isEmpty(products)}">
+            <div class="product-card" th:each="p : ${products}" style="cursor:default;">
+                <a th:href="@{/products/{id}(id=${p.productId})}" style="display:block;">
+                    <div class="product-card-img">
+                        <span th:class="${p.stockQuantity > 0} ? 'stock-badge in-stock' : 'stock-badge out-of-stock'"
+                              th:text="${p.stockQuantity > 0} ? 'In Stock' : 'Out of Stock'">In Stock</span>
+                        <img th:if="${p.imageUrl != null and !p.imageUrl.isEmpty()}" th:src="@{${p.imageUrl}}" th:alt="${p.name}">
+                        <span th:unless="${p.imageUrl != null and !p.imageUrl.isEmpty()}" class="emoji">&#127929;</span>
+                    </div>
+                </a>
+                <div class="product-card-body">
+                    <div class="product-card-cat" th:text="${p.categoryName}">Category</div>
+                    <a th:href="@{/products/{id}(id=${p.productId})}">
+                        <div class="product-card-name" th:text="${p.name}">Product name</div>
+                    </a>
+                    <p style="font-size:0.75rem;color:var(--muted);margin-bottom:0.9rem;">
+                        <span th:if="${p.stockQuantity > 0}" th:text="'In stock: ' + ${p.stockQuantity}"></span>
+                        <span th:unless="${p.stockQuantity > 0}">Out of stock</span>
+                    </p>
+                    <div class="product-card-footer">
+                        <div class="product-price">
+                            <span th:if="${p.onPromotion}" style="text-decoration:line-through; color:var(--muted); font-size:0.75rem; margin-right:0.35rem;" th:text="'Rs. ' + ${#numbers.formatDecimal(p.price,1,'COMMA',2,'POINT')}"></span>
+                            <span class="amount" th:text="'Rs. ' + ${#numbers.formatDecimal(p.onPromotion ? p.promoPrice : p.price,1,'COMMA',2,'POINT')}">Rs. 0.00</span>
+                        </div>
+                        <div style="display:flex; gap:0.4rem;">
+                            <form th:action="@{/cart}" method="post">
+                                <input type="hidden" name="productId" th:value="${p.productId}">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn btn-primary btn-sm" th:disabled="${p.stockQuantity == 0}">Add to Cart</button>
+                            </form>
+                            <form th:if="${loggedInUser != null}" th:action="@{/wishlist/add}" method="post">
+                                <input type="hidden" name="productId" th:value="${p.productId}">
+                                <button type="submit" class="btn btn-outline btn-sm">&#9825;</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p class="empty-fleet" th:if="${#lists.isEmpty(products)}">No products found.</p>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-links">
+        <a th:href="@{/terms}">Terms &amp; Conditions</a>
+        <a th:href="@{/privacy}">Privacy Policy</a>
+        <a th:href="@{/contact}">Contact &amp; Support</a>
+    </div>
+    <div class="copyright">&copy; 2026 Ceylon Music House — The Home of Music. All Rights Reserved.</div>
+</footer>
+
+</body>
+</html>

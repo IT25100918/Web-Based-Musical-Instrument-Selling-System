@@ -1,0 +1,12 @@
+# build output
+target/
+
+# IDE files (IntelliJ also stores a copy of your database contents here)
+.idea/
+*.iml
+
+# uploaded product images
+uploads/
+
+# local secrets
+secrets.properties

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${product.name} + ' | Ceylon Music House'">Product</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+    <style>
+        .stars { color: var(--gold); letter-spacing: 2px; font-size: 1rem; }
+        .stars-muted { color: var(--border2); }
+        .review-item { border-bottom: 1px solid var(--border); padding: 1.1rem 0; }
+        .review-item:last-child { border-bottom: none; }
+        .review-item-hdr { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; margin-bottom: 0.35rem; }
+        .review-author { font-weight: 600; color: var(--text); font-size: 0.85rem; }
+        .review-date { color: var(--muted); font-size: 0.72rem; }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-name">Ceylon Music House</span>
+            <span class="brand-sub">Fine Instruments &amp; Sound</span>
+        </a>
+        <nav class="header-nav">
+            <a th:href="@{/}">Home</a>
+            <a th:href="@{/products}" class="active">Shop</a>
+            <a th:if="${loggedInUser != null}" th:href="@{/orders}">Orders</a>
+            <a th:if="${loggedInUser != null}" th:href="@{/wishlist}">Wishlist</a>
+            <a th:if="${loggedInUser != null}" th:href="@{/complaints}">Support</a>
+            <a class="cart-badge" th:href="@{/cart}">Cart</a>
+        </nav>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+            <a th:if="${role != null and role != 'CUSTOMER'}" th:href="@{/admin/dashboard}" class="btn btn-outline btn-sm">Dashboard</a>
+            <a th:if="${loggedInUser == null}" th:href="@{/login}" class="btn btn-outline btn-sm">Sign In</a>
+            <a th:if="${loggedInUser != null}" th:href="@{/profile}" class="btn btn-outline btn-sm">My Profile</a>
+            <form th:if="${loggedInUser != null}" th:action="@{/logout}" method="post" style="display:inline;margin:0;"><button type="submit" class="btn-logout">Logout</button></form>
+        </div>
+    </div>
+</header>
+
+<div class="main">
+    <div class="container" style="max-width: 900px;">
+        <div class="panel" style="margin-top:1.5rem;">
+            <div class="panel-body" style="display:grid; grid-template-columns: 1fr 1fr; gap:2rem;">
+                <div class="product-card-img" style="height:340px; border-radius:0.8rem; border:1px solid var(--border);">
+                    <img id="mainProductImage" th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}" th:src="@{${product.imageUrl}}" th:alt="${product.name}">
+                    <span th:unless="${product.imageUrl != null and !product.imageUrl.isEmpty()}" class="emoji" style="font-size:6rem;">&#127929;</span>
+                </div>
+                <div th:if="${!#lists.isEmpty(galleryImages)}" style="display:flex; gap:0.5rem; margin-top:0.6rem; grid-column: 1; grid-row: 2;">
+                    <img th:each="img : ${galleryImages}" th:src="@{${img.imageUrl}}" th:attr="data-full=@{${img.imageUrl}}"
+                         class="gallery-thumb"
+                         style="width:60px; height:60px; object-fit:cover; border-radius:0.4rem; border:1px solid var(--border); cursor:pointer;">
+                </div>
+                <div style="grid-column: 2; grid-row: 1 / span 2;">
+                    <div class="product-card-cat" th:text="${product.categoryName}">Category</div>
+                    <h1 style="font-family:'Playfair Display',serif; font-size:1.8rem; margin:0.4rem 0 0.8rem;" th:text="${product.name}">Product name</h1>
+
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.6rem;" th:if="${reviewCount > 0}">
+                        <span class="stars">
+                            <span th:each="i : ${#numbers.sequence(1,5)}" th:text="${i <= ratingStars} ? '★' : '☆'"
+                                  th:classappend="${i <= ratingStars} ? '' : 'stars-muted'"></span>
+                        </span>
+                        <span style="font-size:0.8rem; color:var(--muted);" th:text="${#numbers.formatDecimal(averageRating,1,1)} + ' (' + ${reviewCount} + (${reviewCount == 1} ? ' review)' : ' reviews)')"></span>
+                    </div>
+                    <div style="font-size:0.8rem; color:var(--muted); margin-bottom:0.6rem;" th:if="${reviewCount == 0}">No reviews yet</div>
+
+                    <div class="product-price" style="margin-bottom:0.6rem;">
+                        <span th:if="${product.onPromotion}" style="text-decoration:line-through; color:var(--muted); font-size:0.9rem; margin-right:0.5rem;" th:text="'Rs. ' + ${#numbers.formatDecimal(product.price,1,'COMMA',2,'POINT')}"></span>
+                        <span class="amount" th:text="'Rs. ' + ${#numbers.formatDecimal(finalPrice,1,'COMMA',2,'POINT')}">Rs. 0.00</span>
+                        <span th:if="${product.onPromotion}" class="pill pill-ACTIVE" style="margin-left:0.5rem;">ON SALE</span>
+                        <div th:if="${priceSavings != null}" style="font-size:0.8rem; color:var(--muted); margin-top:0.25rem;"
+                             th:text="${priceDescription} + ' - you save Rs. ' + ${#numbers.formatDecimal(priceSavings,1,'COMMA',2,'POINT')}"></div>
+                    </div>
+                    <p style="font-size:0.8rem;color:var(--muted);margin-bottom:1rem;">
+                        <span th:if="${product.stockQuantity > 0}" th:text="'In stock: ' + ${product.stockQuantity}"></span>
+                        <span th:unless="${product.stockQuantity > 0}">Out of stock</span>
+                    </p>
+                    <p style="line-height:1.7; margin-bottom:1.75rem;" th:text="${product.description}">Description</p>
+
+                    <div style="display:flex; gap:0.75rem;">
+                        <form th:action="@{/cart}" method="post">
+                            <input type="hidden" name="productId" th:value="${product.productId}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-primary" th:disabled="${product.stockQuantity == 0}">Add to Cart</button>
+                        </form>
+                        <form th:if="${loggedInUser != null}" th:action="@{/wishlist/add}" method="post">
+                            <input type="hidden" name="productId" th:value="${product.productId}">
+                            <button type="submit" class="btn btn-outline">&#9825; Save</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel" style="margin-top:1.5rem;">
+            <div class="panel-hdr"><h3>Customer Reviews</h3></div>
+            <div class="panel-body">
+
+                <div class="alert alert-error" th:if="${reviewError}" th:text="${reviewError}"></div>
+                <div class="alert alert-success" th:if="${reviewMessage}" th:text="${reviewMessage}"></div>
+
+                <!-- Write / edit a review - only for logged-in customers who purchased this product -->
+                <div th:if="${loggedInUser != null and canReview}" style="margin-bottom:1.75rem; padding-bottom:1.75rem; border-bottom:1px solid var(--border);">
+                    <div class="form-label" style="margin-bottom:0.75rem;" th:text="${myReview != null} ? 'Edit your review' : 'Write a review'"></div>
+                    <form th:action="@{/products/{id}/reviews(id=${product.productId})}" method="post">
+                        <div class="form-group">
+                            <label class="form-label">Rating</label>
+                            <select name="rating" class="form-input" style="max-width:220px;" required>
+                                <option value="">Choose a rating</option>
+                                <option th:each="i : ${#numbers.sequence(5,1,-1)}"
+                                        th:value="${i}"
+                                        th:text="${i} + ' star' + (${i} == 1 ? '' : 's')"
+                                        th:selected="${myReview != null and myReview.rating == i}"></option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Comment (optional)</label>
+                            <textarea name="comment" class="form-input" rows="3" style="resize:vertical;" th:text="${myReview != null ? myReview.comment : ''}"></textarea>
+                        </div>
+                        <div style="display:flex; gap:0.75rem;">
+                            <button type="submit" class="btn btn-primary" th:text="${myReview != null} ? 'Update Review' : 'Submit Review'"></button>
+                        </div>
+                    </form>
+                    <form th:if="${myReview != null}" th:action="@{/products/{id}/reviews/delete(id=${product.productId})}" method="post" style="margin-top:0.6rem;"
+                          onsubmit="return confirm('Remove your review?');">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete my review</button>
+                    </form>
+                </div>
+
+                <p th:if="${loggedInUser != null and canReview == false}" style="color:var(--muted); font-size:0.82rem; margin-bottom:1.5rem;">
+                    Only customers who've purchased this product can leave a review.
+                </p>
+                <p th:if="${loggedInUser == null}" style="color:var(--muted); font-size:0.82rem; margin-bottom:1.5rem;">
+                    <a th:href="@{/login}" style="color:var(--gold);">Sign in</a> to write a review if you've purchased this item.
+                </p>
+
+                <!-- Sort reviews (Strategy pattern: the chosen sort strategy orders the list) -->
+                <form th:if="${!#lists.isEmpty(reviews)}" th:action="@{/products/{id}(id=${product.productId})}" method="get"
+                      style="margin-bottom:0.8rem; font-size:0.85rem;">
+                    <label for="reviewSort" style="color:var(--muted); margin-right:0.4rem;">Sort reviews:</label>
+                    <select id="reviewSort" name="sort" onchange="this.form.submit()">
+                        <option th:each="opt : ${reviewSortOptions}" th:value="${opt.key}" th:text="${opt.label}"
+                                th:selected="${opt.key == selectedSort}">Newest first</option>
+                    </select>
+                    <noscript><button type="submit" class="btn btn-sm">Apply</button></noscript>
+                </form>
+
+                <!-- Existing reviews -->
+                <div th:if="${#lists.isEmpty(reviews)}" class="empty-fleet" style="padding:1rem 0;">Be the first to review this product.</div>
+                <div th:each="review : ${reviews}" class="review-item">
+                    <div class="review-item-hdr">
+                        <span class="review-author" th:text="${review.reviewerName}">Customer</span>
+                        <span class="review-date" th:text="${#dates.format(review.updatedAt, 'MMM d, yyyy')}">date</span>
+                    </div>
+                    <div class="stars" style="margin-bottom:0.4rem;">
+                        <span th:each="i : ${#numbers.sequence(1,5)}" th:text="${i <= review.rating} ? '★' : '☆'"
+                              th:classappend="${i <= review.rating} ? '' : 'stars-muted'"></span>
+                    </div>
+                    <p style="font-size:0.85rem; line-height:1.6; margin:0;" th:if="${review.comment != null and !review.comment.isEmpty()}" th:text="${review.comment}"></p>
+                    <form th:if="${loggedInUser != null}"
+                          th:action="@{/products/{productId}/reviews/{reviewId}/flag(productId=${product.productId},reviewId=${review.reviewId})}"
+                          method="post" style="margin-top:0.5rem;"
+                          onsubmit="return confirm('Report this review to the store team?');">
+                        <button type="submit" class="btn btn-outline btn-sm" style="font-size:0.7rem; padding:0.25rem 0.6rem;">Report</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-links">
+        <a th:href="@{/terms}">Terms &amp; Conditions</a>
+        <a th:href="@{/privacy}">Privacy Policy</a>
+        <a th:href="@{/contact}">Contact &amp; Support</a>
+    </div>
+    <div class="copyright">&copy; 2026 Ceylon Music House — The Home of Music. All Rights Reserved.</div>
+</footer>
+
+<script>
+    // Clicking a gallery thumbnail swaps it into the main image slot
+    document.querySelectorAll('.gallery-thumb').forEach(function (thumb) {
+        thumb.addEventListener('click', function () {
+            var main = document.getElementById('mainProductImage');
+            if (main && thumb.dataset.full) { main.src = thumb.dataset.full; }
+        });
+    });
+</script>
+
+</body>
+</html>
