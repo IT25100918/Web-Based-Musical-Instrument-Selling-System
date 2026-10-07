@@ -1,0 +1,33 @@
+/* Admin console theme - same palette as the home page (deep teal + warm coral).
+   Loaded after theme.css on every admin page, so it only has to override the design tokens. */
+:root {
+  --navy: #08272b;  --navy-2: #0f4048;  --coral: #ff7a4d;  --coral-dk: #e8602f;  --mint: #e6f2ee;
+
+  --gold: #ff7a4d;  --gold-dk: #e8602f;  --gold-lt: #ffe9e0;  --gold-light: #ff9b78;
+  --primary: #ff7a4d;  --primary-dark: #08272b;  --primary-light: #ffe9e0;  --primary-glow: rgba(255,122,77,.28);
+  --black: #08272b;  --silver: #56696c;  --text: #17292c;  --text2: #56696c;  --muted: #56696c;
+  --line: #d8e5e1;  --border: #d8e5e1;  --border2: #c3d6d1;
+  --powder: #f3f8f6;  --bg2: #f3f8f6;  --card2: #f3f8f6;
+  --spice: #e8602f;  --lotus: #ff7a4d;  --ocean: #08272b;  --rosewood: #08272b;  --rosewood-2: #0f4048;
+  --shadow: 0 14px 34px rgba(8,39,43,.12);
+}
+body { background: #f3f8f6; }
+
+/* dark teal header with the light logo */
+.header { background: var(--navy); border-bottom: 3px solid var(--coral); box-shadow: 0 6px 24px rgba(8,39,43,.18); backdrop-filter: none; }
+a.brand, .brand { background-image: url('/images/logo-wordmark.png'); }
+.header-nav a { color: #b6d2cd; }
+.header-nav a:hover, .header-nav a.active { color: #fff; border-bottom-color: var(--coral); }
+.header .btn-outline { color: #fff; border-color: rgba(255,255,255,.4); }
+.header .btn-outline:hover { background: var(--coral); border-color: var(--coral); color: var(--navy); }
+.btn-logout { color: #b6d2cd; border-color: rgba(255,255,255,.3); }
+.btn-logout:hover { color: var(--navy); background: #fff; border-color: #fff; }
+
+footer { background: var(--navy); }
+
+/* status pills / alerts that had hard-coded yellow */
+.pill-PENDING, .pill-REQUESTED, .pill-REFUNDED, .pill-LowStock, .pill-OPEN { background: #ffe9e0; color: #9a3a14; border: 1px solid #ffc4ae; }
+.pill-PROCESSING, .pill-SHIPPED, .pill-IN_TRANSIT, .pill-ASSIGNED, .pill-IN_PROGRESS { background: #e1eeea; color: var(--navy); border: 1px solid #c3d6d1; }
+.alert-success { background: #ffe9e0; border: 1px solid #ffc4ae; color: var(--navy); }
+tr:hover td { background: rgba(255,122,77,.07); }
+.form-input:focus { border-color: var(--coral); box-shadow: 0 0 0 4px rgba(255,122,77,.22); }
