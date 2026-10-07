@@ -24,6 +24,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class ReviewController {
 
+    private static final int MAX_REVIEW_COMMENT = 1000;
+
     private final ReviewDAO reviewDAO;
     private final OrderDAO orderDAO;
 
@@ -62,7 +64,13 @@ public class ReviewController {
             return "redirect:/products/" + productId;
         }
 
-        reviewDAO.addOrUpdateReview(productId, user.getUserId(), rating, comment);
+        String cleanComment = comment == null ? null : comment.trim();
+        if (cleanComment != null && cleanComment.length() > MAX_REVIEW_COMMENT) {
+            redirectAttributes.addFlashAttribute("reviewError", "Your review is too long (max " + MAX_REVIEW_COMMENT + " characters).");
+            return "redirect:/products/" + productId;
+        }
+
+        reviewDAO.addOrUpdateReview(productId, user.getUserId(), rating, cleanComment);
         redirectAttributes.addFlashAttribute("reviewMessage", "Thanks for your review!");
         return "redirect:/products/" + productId;
     }

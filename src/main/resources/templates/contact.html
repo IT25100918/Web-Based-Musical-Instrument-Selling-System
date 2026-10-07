@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Contact &amp; Support | Ceylon Music House</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+</head>
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-name">Ceylon Music House</span>
+            <span class="brand-sub">Fine Instruments &amp; Sound</span>
+        </a>
+        <nav class="header-nav">
+            <a th:href="@{/}">Home</a>
+            <a th:href="@{/products}">Shop</a>
+            <a th:if="${loggedInUser != null}" th:href="@{/orders}">Orders</a>
+            <a class="cart-badge" th:href="@{/cart}">Cart</a>
+        </nav>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+            <a th:if="${loggedInUser == null}" th:href="@{/login}" class="btn btn-outline btn-sm">Sign In</a>
+            <a th:if="${loggedInUser != null}" th:href="@{/profile}" class="btn btn-outline btn-sm">My Profile</a>
+            <a th:if="${role != null and role != 'CUSTOMER'}" th:href="@{/admin/dashboard}" class="btn btn-outline btn-sm">Dashboard</a>
+        </div>
+    </div>
+</header>
+
+<div class="main">
+    <div class="container" style="max-width: 700px;">
+        <div class="page-header">
+            <div><div class="page-title">Contact &amp; Support</div><div class="page-sub">We usually reply within one business day</div></div>
+        </div>
+
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+        <div class="alert alert-success" th:if="${message}" th:text="${message}"></div>
+
+        <div class="panel">
+            <div class="panel-body">
+                <p style="color:var(--muted); font-size:0.85rem; margin-bottom:1.25rem;">
+                    Kandy, Sri Lanka &middot; +94 112 595 608
+                </p>
+                <form th:action="@{/contact}" method="post">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Your Name</label>
+                            <input type="text" name="name" maxlength="100" class="form-input" th:value="${prefillName}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" maxlength="100" class="form-input" th:value="${prefillEmail}" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Subject</label>
+                        <input type="text" name="subject" maxlength="150" th:value="${prefillSubject}" class="form-input" placeholder="Order question, return request, etc." required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Message</label>
+                        <textarea name="message" maxlength="2000" th:text="${prefillMessage}" class="form-input" rows="5" required style="resize:vertical;"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="copyright">&copy; 2026 Ceylon Music House — The Home of Music. All Rights Reserved.</div>
+</footer>
+
+</body>
+</html>

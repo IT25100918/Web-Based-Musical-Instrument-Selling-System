@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Privacy Policy | Ceylon Music House</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+</head>
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-name">Ceylon Music House</span>
+            <span class="brand-sub">Fine Instruments &amp; Sound</span>
+        </a>
+        <nav class="header-nav">
+            <a th:href="@{/}">Home</a>
+            <a th:href="@{/products}">Shop</a>
+            <a th:if="${loggedInUser != null}" th:href="@{/orders}">Orders</a>
+            <a class="cart-badge" th:href="@{/cart}">Cart</a>
+        </nav>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+            <a th:if="${loggedInUser == null}" th:href="@{/login}" class="btn btn-outline btn-sm">Sign In</a>
+            <a th:if="${loggedInUser != null}" th:href="@{/profile}" class="btn btn-outline btn-sm">My Profile</a>
+            <a th:if="${role != null and role != 'CUSTOMER'}" th:href="@{/admin/dashboard}" class="btn btn-outline btn-sm">Dashboard</a>
+        </div>
+    </div>
+</header>
+
+<div class="main">
+    <div class="container" style="max-width: 800px;">
+        <div class="page-header">
+            <div><div class="page-title">Privacy Policy</div><div class="page-sub">Last updated July 2026</div></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-body" style="line-height:1.8; font-size:0.9rem; color:var(--text);">
+                <h3 style="color:var(--gold-light); margin-bottom:0.5rem;">What we collect</h3>
+                <p style="margin-bottom:1.2rem;">When you create an account or place an order, we collect your name, email address, phone number, delivery address, and order/payment history so we can process and fulfil your purchases.</p>
+
+                <h3 style="color:var(--gold-light); margin-bottom:0.5rem;">How we protect it</h3>
+                <p style="margin-bottom:1.2rem;">Passwords are never stored in plain text - they're hashed before being saved. Payment details are handled through our checkout process and are not stored in plain form. Access to customer data in our admin tools is limited to authorized store staff.</p>
+
+                <h3 style="color:var(--gold-light); margin-bottom:0.5rem;">How we use it</h3>
+                <p style="margin-bottom:1.2rem;">We use your information to process orders, coordinate delivery, send order/delivery/account notifications, and respond to support requests. We do not sell your personal information to third parties.</p>
+
+                <h3 style="color:var(--gold-light); margin-bottom:0.5rem;">Emails</h3>
+                <p style="margin-bottom:1.2rem;">We email you for account verification, password resets, order confirmations, and delivery updates. These are transactional emails tied to your account activity, not marketing.</p>
+
+                <h3 style="color:var(--gold-light); margin-bottom:0.5rem;">Your choices</h3>
+                <p style="margin-bottom:1.2rem;">You can review and update your profile information at any time from <a th:href="@{/profile}" style="color:var(--gold);">My Profile</a>, and you can permanently delete your account from the same page.</p>
+
+                <h3 style="color:var(--gold-light); margin-bottom:0.5rem;">Contact us</h3>
+                <p>Questions about this policy or your data? Reach out via the <a th:href="@{/contact}" style="color:var(--gold);">Contact page</a>.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="copyright">&copy; 2026 Ceylon Music House — The Home of Music. All Rights Reserved.</div>
+</footer>
+
+</body>
+</html>
