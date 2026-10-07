@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Dashboard | Ceylon Music House</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <style>
+        .welcome{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap;margin:1.5rem 0 1.75rem;padding:1.6rem 1.8rem;border-radius:var(--r-lg);
+            background:linear-gradient(135deg,#0f4048 0%,#08272b 100%);box-shadow:var(--shadow)}
+        .welcome .av{flex:none;display:grid;place-items:center;width:76px;height:76px;border-radius:50%;background:var(--gold);color:var(--black);
+            font-size:1.9rem;font-weight:900;border:3px solid rgba(255,122,77,.55);outline:2px solid rgba(255,122,77,.3);outline-offset:3px}
+        .welcome .hi{font-size:.72rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+        .welcome h1{font-size:2rem;line-height:1.15;margin:.15rem 0 .3rem;color:#fff}
+        .welcome p{margin:0 0 .7rem;color:#b6d2cd;font-size:.95rem;font-weight:600}
+        .welcome .tags{display:flex;gap:.5rem;flex-wrap:wrap}
+        .welcome .tag{font-size:.7rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:.3rem .7rem;border-radius:8px;
+            background:rgba(255,255,255,.1);color:#e8e8e8}
+        .welcome .tag.area{background:rgba(255,122,77,.2);color:var(--gold)}
+        .welcome .tag.who{background:#fff;color:var(--black);letter-spacing:.12em}
+        .welcome .tag.ok{background:rgba(46,125,50,.28);color:#8fe19a}
+        .welcome .tag.bad{background:rgba(192,57,43,.3);color:#ff9d92}
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <a class="brand" th:href="@{/admin/dashboard}">
+            <span class="brand-name">Ceylon Music House</span>
+            <span class="brand-sub">Admin Console</span>
+        </a>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+            <a th:href="@{/products}" class="btn btn-outline btn-sm">View Store</a>
+            <form th:action="@{/logout}" method="post" style="display:inline;margin:0;"><button type="submit" class="btn-logout">Logout</button></form>
+        </div>
+    </div>
+</header>
+
+<div class="main">
+    <div class="container">
+        <div class="welcome">
+            <div class="av" th:text="${staffInitial}">A</div>
+            <div>
+                <div class="hi" th:text="${greeting}">Good morning</div>
+                <h1 th:text="${staffName}">Admin</h1>
+                <p th:text="${staffBlurb}">Choose a section to manage.</p>
+                <div class="tags">
+                    <span class="tag" th:text="${staffType}">STAFF</span>
+                    <span class="tag area" th:text="${staffArea}">MANAGER</span>
+                    <span class="tag who" th:if="${staffOwner != null}" th:text="${staffOwner}">NAME</span>
+                    <span class="tag" th:classappend="${staffStatus == 'ACTIVE'} ? 'ok' : 'bad'" th:text="${staffStatus}">ACTIVE</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-row" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <a th:if="${role == 'ADMIN' or role == 'CATALOG_MANAGER'}" class="stat-card" th:href="@{/admin/products}"><h4>Catalogue</h4><div class="stat-val" style="font-size:1.2rem;">Products</div></a>
+            <a th:if="${role == 'ADMIN' or role == 'CATALOG_MANAGER'}" class="stat-card" th:href="@{/admin/categories}"><h4>Catalogue</h4><div class="stat-val" style="font-size:1.2rem;">Categories</div></a>
+            <a th:if="${role == 'ADMIN' or role == 'ORDER_PAYMENT_MANAGER' or role == 'CUSTOMER_RELATIONS_MANAGER'}" class="stat-card" th:href="@{/admin/orders}"><h4>Sales</h4><div class="stat-val" style="font-size:1.2rem;">Orders</div></a>
+            <a th:if="${role == 'ADMIN' or role == 'ORDER_PAYMENT_MANAGER'}" class="stat-card" th:href="@{/admin/payments}"><h4>Sales</h4><div class="stat-val" style="font-size:1.2rem;">Payments</div></a>
+            <a th:if="${role == 'ADMIN' or role == 'INVENTORY_MANAGER'}" class="stat-card" th:href="@{/admin/inventory}"><h4>Stock</h4><div class="stat-val" style="font-size:1.2rem;">Inventory</div></a>
+            <a th:if="${role == 'ADMIN' or role == 'INVENTORY_MANAGER'}" class="stat-card" th:href="@{/admin/suppliers}"><h4>Stock</h4><div class="stat-val" style="font-size:1.2rem;">Suppliers</div></a>
+            <a th:if="${role == 'ADMIN' or role == 'INVENTORY_MANAGER'}" class="stat-card" th:href="@{/admin/purchase-orders}"><h4>Stock</h4><div class="stat-val" style="font-size:1.2rem;">Purchase Orders</div></a>
+            <a th:if="${role == 'ADMIN' or role == 'DELIVERY_MANAGER'}" class="stat-card" th:href="@{/admin/deliveries}"><h4>Fulfilment</h4><div class="stat-val" style="font-size:1.2rem;">Deliveries</div></a>
+            <a th:if="${role == 'ADMIN' or role == 'CUSTOMER_RELATIONS_MANAGER'}" class="stat-card" th:href="@{/admin/customers}"><h4>Customer Relations</h4><div class="stat-val" style="font-size:1.2rem;">Customers</div></a>
+            <a th:if="${role == 'ADMIN' or role == 'CUSTOMER_RELATIONS_MANAGER'}" class="stat-card" th:href="@{/admin/complaints}"><h4>Customer Relations</h4><div class="stat-val" style="font-size:1.2rem;">Complaints</div></a>
+            <a th:if="${role == 'ADMIN' or role == 'CUSTOMER_RELATIONS_MANAGER'}" class="stat-card" th:href="@{/admin/reviews}"><h4>Customer Relations</h4><div class="stat-val" style="font-size:1.2rem;">Reviews</div></a>
+            <a th:if="${role == 'ADMIN' or role == 'ORDER_PAYMENT_MANAGER'}" class="stat-card" th:href="@{/admin/reports/sales}"><h4>Reporting</h4><div class="stat-val" style="font-size:1.2rem;">Sales Report</div></a>
+            <a th:if="${role == 'ADMIN' or role == 'INVENTORY_MANAGER'}" class="stat-card" th:href="@{/admin/reports/inventory}"><h4>Reporting</h4><div class="stat-val" style="font-size:1.2rem;">Inventory Report</div></a>
+            <a th:if="${role == 'ADMIN' or role == 'ORDER_PAYMENT_MANAGER'}" class="stat-card" th:href="@{/admin/reports/financial}"><h4>Reporting</h4><div class="stat-val" style="font-size:1.2rem;">Financial Statement</div></a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
