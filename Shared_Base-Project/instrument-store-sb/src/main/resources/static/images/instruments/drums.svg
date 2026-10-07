@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#E6F2EE"/>
+  <g stroke="#0F4048" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- snare drum -->
+    <ellipse cx="200" cy="170" rx="90" ry="26" fill="#FFE9E0"/>
+    <path d="M110 170 v70 a90 24 0 0 0 180 0 v-70" fill="#FFE9E0"/>
+    <ellipse cx="200" cy="240" rx="90" ry="24" fill="#FFE9E0"/>
+    <!-- lugs -->
+    <line x1="130" y1="190" x2="130" y2="222" stroke-width="3"/>
+    <line x1="200" y1="196" x2="200" y2="228" stroke-width="3"/>
+    <line x1="270" y1="190" x2="270" y2="222" stroke-width="3"/>
+    <!-- drum sticks -->
+    <line x1="150" y1="110" x2="90" y2="60" stroke-width="7"/>
+    <line x1="250" y1="110" x2="310" y2="60" stroke-width="7"/>
+    <circle cx="90" cy="60" r="6" fill="#0F4048" stroke="none"/>
+    <circle cx="310" cy="60" r="6" fill="#0F4048" stroke="none"/>
+  </g>
+</svg>
