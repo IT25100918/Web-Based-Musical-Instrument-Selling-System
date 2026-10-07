@@ -252,6 +252,8 @@
         .category-tile:hover{ background:rgba(168,118,62,0.06); }
         .category-tile .icon{ font-size:2rem; display:block; margin-bottom:1rem; }
         .category-tile img{ width:44px; height:44px; object-fit:contain; margin:0 auto 1rem; }
+        /* Real photos (anything that is not an .svg icon) fill the top of the tile */
+        .category-tile img.photo{ width:100%; height:150px; object-fit:cover; margin:0 0 1rem; border-radius:2px; }
         .category-tile h3{
             font-family:'Fraunces', serif;
             font-style:italic;
@@ -442,7 +444,8 @@
     <div class="category-grid reveal" th:if="${!#lists.isEmpty(categories)}">
         <a class="category-tile" th:each="c : ${categories}" th:href="@{/products(categoryId=${c.categoryId})}"
            th:with="lname=${#strings.toLowerCase(c.name)}">
-            <img class="icon" th:if="${c.imageUrl != null and !c.imageUrl.isEmpty()}" th:src="@{${c.imageUrl}}" th:alt="${c.name}">
+            <img class="icon" th:if="${c.imageUrl != null and !c.imageUrl.isEmpty()}" th:src="@{${c.imageUrl}}" th:alt="${c.name}"
+                 th:classappend="${#strings.endsWith(#strings.toLowerCase(c.imageUrl), '.svg')} ? '' : 'photo'">
             <span th:unless="${c.imageUrl != null and !c.imageUrl.isEmpty()}" class="icon"
                   th:text="${#strings.contains(lname,'string') or #strings.contains(lname,'guitar') or #strings.contains(lname,'bass')} ? '🎸' :
                      (${#strings.contains(lname,'percuss') or #strings.contains(lname,'drum')} ? '🥁' :
