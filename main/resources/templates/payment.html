@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="'Pay for Order #' + ${order.orderId} + ' | Ceylon Music House'">Payment</title>
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+</head>
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-name">Ceylon Music House</span>
+            <span class="brand-sub">Fine Instruments &amp; Sound</span>
+        </a>
+        <div class="header-nav">
+            <a th:href="@{/orders}">&larr; My Orders</a>
+            <a th:if="${role != null and role != 'CUSTOMER'}" th:href="@{/admin/dashboard}">Dashboard</a>
+        </div>
+    </div>
+</header>
+
+<div class="main">
+    <div class="auth-wrap">
+        <div class="auth-card">
+            <div class="auth-title" th:text="'Pay for Order #' + ${order.orderId}">Pay</div>
+            <div class="stat-val" style="text-align:center; font-size:1.6rem; margin-bottom:1.5rem;" th:text="'Amount due: $' + ${order.totalAmount}">Amount</div>
+
+            <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+            <form th:action="@{/payment/{id}(id=${order.orderId})}" method="post">
+                <div class="form-group">
+                    <label class="form-label">Payment Method</label>
+                    <select name="paymentMethod" class="form-input" required>
+                        <option value="CARD">Card</option>
+                        <option value="COD">Cash on Delivery</option>
+                        <option value="BANK_TRANSFER">Bank Transfer</option>
+                    </select>
+                </div>
+                <p style="font-size: 0.72rem; color: var(--muted); margin-bottom: 1rem;">
+                    This is a simulated payment for demo purposes — no real charge is made.
+                </p>
+                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Pay Now</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
