@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Profile | Ceylon Music House</title>
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+</head>
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-name">Ceylon Music House</span>
+            <span class="brand-sub">Fine Instruments &amp; Sound</span>
+        </a>
+        <nav class="header-nav">
+            <a th:href="@{/}">Home</a>
+            <a th:href="@{/products}">Shop</a>
+            <a th:href="@{/orders}">Orders</a>
+            <a th:href="@{/wishlist}">Wishlist</a>
+            <a th:href="@{/complaints}">Support</a>
+            <a class="cart-badge" th:href="@{/cart}">Cart</a>
+        </nav>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+            <a th:if="${role != null and role != 'CUSTOMER'}" th:href="@{/admin/dashboard}" class="btn btn-outline btn-sm">Dashboard</a>
+            <a th:href="@{/profile}" class="btn btn-outline btn-sm active">My Profile</a>
+            <form th:action="@{/logout}" method="post" style="display:inline;margin:0;"><button type="submit" class="btn-logout">Logout</button></form>
+        </div>
+    </div>
+</header>
+
+<div class="main">
+    <div class="container" style="max-width: 560px;">
+        <div class="page-header">
+            <div><div class="page-title">My Profile</div></div>
+            <a th:href="@{/payments}" class="panel-link">View Payment History &rarr;</a>
+        </div>
+
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+        <div class="alert alert-success" th:if="${message}" th:text="${message}"></div>
+
+        <div class="alert alert-error" th:if="${!user.emailVerified}" style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+            <span>Your email address isn't verified yet.</span>
+            <form th:action="@{/profile/resend-verification}" method="post" style="margin:0;">
+                <button type="submit" class="btn btn-outline btn-sm">Resend verification email</button>
+            </form>
+        </div>
+
+        <div class="panel">
+            <div class="panel-body">
+                <form th:action="@{/profile}" method="post">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" name="fullName" class="form-input" th:value="${user.fullName}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email (cannot be changed)</label>
+                        <input type="email" class="form-input" th:value="${user.email}" disabled style="opacity:0.6;">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone</label>
+                        <input type="text" name="phone" class="form-input" th:value="${user.phone}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Address</label>
+                        <input type="text" name="address" class="form-input" th:value="${user.address}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-body">
+                <a th:href="@{/profile/password}" style="color:var(--gold);">Change Password &rarr;</a>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-body">
+                <p style="color:var(--muted); font-size:0.8rem; margin-bottom:0.9rem;">
+                    Deleting your account is permanent and cannot be undone.
+                </p>
+                <form th:action="@{/profile/delete}" method="post"
+                      onsubmit="return confirm('Are you sure you want to permanently delete your account?');">
+                    <button type="submit" class="btn btn-danger">Delete Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-links">
+        <a th:href="@{/terms}">Terms &amp; Conditions</a>
+        <a th:href="@{/privacy}">Privacy Policy</a>
+        <a th:href="@{/contact}">Contact &amp; Support</a>
+    </div>
+    <div class="copyright">&copy; 2026 Ceylon Music House — The Home of Music. All Rights Reserved.</div>
+</footer>
+
+</body>
+</html>
