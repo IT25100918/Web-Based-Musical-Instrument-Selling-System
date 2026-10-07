@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Your Cart | Ceylon Music House</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
     <link rel="stylesheet" th:href="@{/css/theme.css}">
 </head>
 <body>
@@ -62,7 +63,7 @@
                         <tbody>
                         <tr th:each="item : ${items}">
                             <td th:text="${item.productName}">Name</td>
-                            <td class="muted" th:text="'$' + ${item.price}">$0.00</td>
+                            <td class="muted" th:text="'Rs. ' + ${#numbers.formatDecimal(item.price,1,'COMMA',2,'POINT')}">Rs. 0.00</td>
                             <td>
                                 <form th:action="@{/cart/update}" method="post" style="display:flex; gap:0.5rem;">
                                     <input type="hidden" name="cartItemId" th:value="${item.cartItemId}">
@@ -70,7 +71,7 @@
                                     <button type="submit" class="btn btn-outline btn-sm">Update</button>
                                 </form>
                             </td>
-                            <td class="primary" th:text="'$' + ${item.lineTotal}">$0.00</td>
+                            <td class="primary" th:text="'Rs. ' + ${#numbers.formatDecimal(item.lineTotal,1,'COMMA',2,'POINT')}">Rs. 0.00</td>
                             <td>
                                 <form th:action="@{/cart/remove}" method="post">
                                     <input type="hidden" name="cartItemId" th:value="${item.cartItemId}">
@@ -85,7 +86,7 @@
 
             <div class="panel">
                 <div class="panel-body" style="display:flex; justify-content: space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
-                    <div class="stat-val" style="font-size:1.5rem;">Total: $<span th:text="${total}">0.00</span></div>
+                    <div class="stat-val" style="font-size:1.5rem;">Total: Rs. <span th:text="${#numbers.formatDecimal(total,1,'COMMA',2,'POINT')}">0.00</span></div>
                     <form th:action="@{/cart/checkout}" method="post">
                         <button type="submit" class="btn btn-primary">Checkout</button>
                     </form>

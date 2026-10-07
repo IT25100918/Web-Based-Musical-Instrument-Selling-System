@@ -14,6 +14,10 @@ import com.instrumentstore.model.User;
 import com.instrumentstore.service.ImageStorageService;
 import com.instrumentstore.service.BusinessException;
 import com.instrumentstore.service.OrderService;
+import com.instrumentstore.patterns.decorator.PriceComponent;
+import com.instrumentstore.patterns.decorator.PromotionDecorator;
+import com.instrumentstore.patterns.decorator.RegularPrice;
+import com.instrumentstore.patterns.strategy.review.ReviewSorter;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -49,11 +53,13 @@ public class ProductCatalogShoppingCartController {
     private final ImageStorageService imageStorageService;
     private final CartDAO cartDAO;
     private final OrderService orderService;
+    private final ReviewSorter reviewSorter; // Strategy pattern context (Customer Review Management)
 
     public ProductCatalogShoppingCartController(ProductDAO productDAO, CategoryDAO categoryDAO, ReviewDAO reviewDAO,
                                                  OrderDAO orderDAO, ProductImageDAO productImageDAO,
                                                  ImageStorageService imageStorageService,
-                                                 CartDAO cartDAO, OrderService orderService) {
+                                                 CartDAO cartDAO, OrderService orderService,
+                                                 ReviewSorter reviewSorter) {
         this.productDAO = productDAO;
         this.categoryDAO = categoryDAO;
         this.reviewDAO = reviewDAO;
@@ -62,6 +68,7 @@ public class ProductCatalogShoppingCartController {
         this.imageStorageService = imageStorageService;
         this.cartDAO = cartDAO;
         this.orderService = orderService;
+        this.reviewSorter = reviewSorter;
     }
 
     // Helper: returns the logged-in User, or null if nobody's logged in
@@ -99,12 +106,25 @@ public class ProductCatalogShoppingCartController {
 
     // GET /products/{id} -> single product detail page
     @GetMapping("/products/{id}")
-    public String productDetail(@PathVariable int id, HttpSession session, Model model) {
+    public String productDetail(@PathVariable int id,
+                                 @RequestParam(required = false) String sort,
+                                 HttpSession session, Model model) {
         Product product = productDAO.getProductById(id);
         if (product == null) {
             return "redirect:/products";
         }
         model.addAttribute("product", product);
+
+        // Decorator pattern: start from the regular price and wrap it with a PromotionDecorator when a
+        // promo is active. Same final amount the cart charges; the decorator also tells us the saving.
+        PriceComponent price = new RegularPrice(product.getPrice());
+        if (product.isOnPromotion()) {
+            price = new PromotionDecorator(price, product.getPromoPrice());
+            model.addAttribute("priceSavings", ((PromotionDecorator) price).getSavings());
+        }
+        model.addAttribute("finalPrice", price.getAmount());
+        model.addAttribute("priceDescription", price.getDescription());
+
         model.addAttribute("galleryImages", productImageDAO.getByProductId(id));
         User loggedInUser = currentUser(session);
         model.addAttribute("loggedInUser", loggedInUser);
@@ -112,7 +132,10 @@ public class ProductCatalogShoppingCartController {
         // Customer Review Management: show existing reviews plus whether the
         // current visitor is allowed to write one themselves.
         List<Review> reviews = reviewDAO.getReviewsForProduct(id);
-        model.addAttribute("reviews", reviews);
+        // Strategy pattern: the chosen sort strategy orders the reviews (default: newest first)
+        model.addAttribute("reviews", reviewSorter.sort(reviews, sort));
+        model.addAttribute("reviewSortOptions", reviewSorter.getStrategies());
+        model.addAttribute("selectedSort", reviewSorter.resolveKey(sort));
         Double averageRating = reviewDAO.getAverageRating(id);
         model.addAttribute("averageRating", averageRating);
         model.addAttribute("reviewCount", reviews.size());
@@ -193,12 +216,18 @@ public class ProductCatalogShoppingCartController {
             validationError = "Price must be between 0 and 99,999,999.99.";
         } else if (promoPrice != null && promoPrice.signum() < 0) {
             validationError = "Promotional price can't be negative.";
+        } else if (promoPrice != null && promoPrice.compareTo(price) >= 0) {
+            validationError = "Promotional price must be lower than the regular price (leave it blank for no promotion).";
+        } else if (description != null && description.length() > 5000) {
+            validationError = "Description is too long (max 5000 characters).";
+        } else if (productId != null && productDAO.getProductById(productId) == null) {
+            validationError = "This product no longer exists.";
         } else if (stockQuantity < 0) {
             validationError = "Stock quantity can't be negative.";
         } else if (categoryDAO.getCategoryById(categoryId) == null) {
             validationError = "Please choose a valid category.";
-        } else if (existingImageUrl != null && existingImageUrl.length() > 255) {
-            validationError = "Image URL is too long (max 255 characters).";
+        } else if (existingImageUrl != null && existingImageUrl.length() > 1000) {
+            validationError = "Image URL is too long (max 1000 characters).";
         }
 
         // Keep the old image unless a new file was actually chosen
@@ -391,6 +420,10 @@ public class ProductCatalogShoppingCartController {
         User user = currentUser(session);
         if (user == null) {
             return "redirect:/login";
+        }
+        if (quantity < 1 || quantity > 99) {
+            redirectAttributes.addFlashAttribute("error", "Quantity must be between 1 and 99.");
+            return "redirect:/cart";
         }
         // Rejects zero/negative quantities (which would otherwise create negative order totals),
         // unknown products and out-of-stock products.

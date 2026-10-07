@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${product.name} + ' | Ceylon Music House'">Product</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
     <link rel="stylesheet" th:href="@{/css/theme.css}">
     <style>
         .stars { color: var(--gold); letter-spacing: 2px; font-size: 1rem; }
@@ -67,9 +68,11 @@
                     <div style="font-size:0.8rem; color:var(--muted); margin-bottom:0.6rem;" th:if="${reviewCount == 0}">No reviews yet</div>
 
                     <div class="product-price" style="margin-bottom:0.6rem;">
-                        <span th:if="${product.onPromotion}" style="text-decoration:line-through; color:var(--muted); font-size:0.9rem; margin-right:0.5rem;" th:text="'$' + ${product.price}"></span>
-                        <span class="amount" th:text="'$' + (${product.onPromotion} ? ${product.promoPrice} : ${product.price})">$0.00</span>
+                        <span th:if="${product.onPromotion}" style="text-decoration:line-through; color:var(--muted); font-size:0.9rem; margin-right:0.5rem;" th:text="'Rs. ' + ${#numbers.formatDecimal(product.price,1,'COMMA',2,'POINT')}"></span>
+                        <span class="amount" th:text="'Rs. ' + ${#numbers.formatDecimal(finalPrice,1,'COMMA',2,'POINT')}">Rs. 0.00</span>
                         <span th:if="${product.onPromotion}" class="pill pill-ACTIVE" style="margin-left:0.5rem;">ON SALE</span>
+                        <div th:if="${priceSavings != null}" style="font-size:0.8rem; color:var(--muted); margin-top:0.25rem;"
+                             th:text="${priceDescription} + ' - you save Rs. ' + ${#numbers.formatDecimal(priceSavings,1,'COMMA',2,'POINT')}"></div>
                     </div>
                     <p style="font-size:0.8rem;color:var(--muted);margin-bottom:1rem;">
                         <span th:if="${product.stockQuantity > 0}" th:text="'In stock: ' + ${product.stockQuantity}"></span>
@@ -133,6 +136,17 @@
                 <p th:if="${loggedInUser == null}" style="color:var(--muted); font-size:0.82rem; margin-bottom:1.5rem;">
                     <a th:href="@{/login}" style="color:var(--gold);">Sign in</a> to write a review if you've purchased this item.
                 </p>
+
+                <!-- Sort reviews (Strategy pattern: the chosen sort strategy orders the list) -->
+                <form th:if="${!#lists.isEmpty(reviews)}" th:action="@{/products/{id}(id=${product.productId})}" method="get"
+                      style="margin-bottom:0.8rem; font-size:0.85rem;">
+                    <label for="reviewSort" style="color:var(--muted); margin-right:0.4rem;">Sort reviews:</label>
+                    <select id="reviewSort" name="sort" onchange="this.form.submit()">
+                        <option th:each="opt : ${reviewSortOptions}" th:value="${opt.key}" th:text="${opt.label}"
+                                th:selected="${opt.key == selectedSort}">Newest first</option>
+                    </select>
+                    <noscript><button type="submit" class="btn btn-sm">Apply</button></noscript>
+                </form>
 
                 <!-- Existing reviews -->
                 <div th:if="${#lists.isEmpty(reviews)}" class="empty-fleet" style="padding:1rem 0;">Be the first to review this product.</div>
