@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Purchase Orders | Admin</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <a class="brand" th:href="@{/admin/dashboard}">
+            <span class="brand-name">Ceylon Music House</span>
+            <span class="brand-sub">Admin Console</span>
+        </a>
+        <nav class="header-nav">
+            <a th:href="@{/admin/dashboard}">Dashboard</a>
+            <a th:if="${role == 'ADMIN' or role == 'CATALOG_MANAGER'}" th:href="@{/admin/products}">Products</a>
+            <a th:if="${role == 'ADMIN' or role == 'CATALOG_MANAGER'}" th:href="@{/admin/categories}">Categories</a>
+            <a th:if="${role == 'ADMIN' or role == 'ORDER_PAYMENT_MANAGER' or role == 'CUSTOMER_RELATIONS_MANAGER'}" th:href="@{/admin/orders}">Orders</a>
+            <a th:if="${role == 'ADMIN' or role == 'ORDER_PAYMENT_MANAGER'}" th:href="@{/admin/payments}">Payments</a>
+            <a th:if="${role == 'ADMIN' or role == 'INVENTORY_MANAGER'}" th:href="@{/admin/inventory}">Inventory</a>
+            <a th:if="${role == 'ADMIN' or role == 'INVENTORY_MANAGER'}" th:href="@{/admin/suppliers}">Suppliers</a>
+            <a th:if="${role == 'ADMIN' or role == 'INVENTORY_MANAGER'}" th:href="@{/admin/purchase-orders}" class="active">P.O.s</a>
+            <a th:if="${role == 'ADMIN' or role == 'DELIVERY_MANAGER'}" th:href="@{/admin/deliveries}">Deliveries</a>
+            <a th:if="${role == 'ADMIN' or role == 'CUSTOMER_RELATIONS_MANAGER'}" th:href="@{/admin/customers}">Customers</a>
+            <a th:if="${role == 'ADMIN' or role == 'CUSTOMER_RELATIONS_MANAGER'}" th:href="@{/admin/complaints}">Complaints</a>
+            <a th:if="${role == 'ADMIN' or role == 'CUSTOMER_RELATIONS_MANAGER'}" th:href="@{/admin/reviews}">Reviews</a>
+            <a th:if="${role == 'ADMIN' or role == 'ORDER_PAYMENT_MANAGER'}" th:href="@{/admin/reports/sales}">Sales Report</a>
+            <a th:if="${role == 'ADMIN' or role == 'INVENTORY_MANAGER'}" th:href="@{/admin/reports/inventory}">Inventory Report</a>
+            <a th:if="${role == 'ADMIN' or role == 'ORDER_PAYMENT_MANAGER'}" th:href="@{/admin/reports/financial}">Financial Report</a>
+        </nav>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+            <a th:href="@{/products}" class="btn btn-outline btn-sm">View Store</a>
+            <form th:action="@{/logout}" method="post" style="display:inline;margin:0;"><button type="submit" class="btn-logout">Logout</button></form>
+        </div>
+    </div>
+</header>
+
+<div class="main">
+    <div class="container">
+        <div class="page-header">
+            <div><div class="page-title">Purchase Orders</div></div>
+            <a class="btn btn-primary" th:href="@{/admin/purchase-orders/new}">+ Request Purchase Order</a>
+        </div>
+
+        <div class="alert alert-error" th:if="${error}" th:text="${error}" style="margin-bottom:1rem;"></div>
+
+        <div class="panel">
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>PO #</th>
+                        <th>Supplier</th>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Status</th>
+                        <th>Update</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="po : ${purchaseOrders}">
+                        <td class="muted" th:text="'#' + ${po.purchaseOrderId}">#1</td>
+                        <td th:text="${po.supplierName}">Supplier</td>
+                        <td th:text="${po.productName}">Product</td>
+                        <td th:text="${po.quantity}">0</td>
+                        <td><span class="pill" th:classappend="'pill-' + ${po.status}" th:text="${po.status}">REQUESTED</span></td>
+                        <td>
+                            <form th:action="@{/admin/purchase-orders/{id}/status(id=${po.purchaseOrderId})}" method="post" style="display:flex; gap:0.4rem;">
+                                <select name="status" class="filter-select">
+                                    <option value="REQUESTED" th:selected="${po.status == 'REQUESTED'}">Requested</option>
+                                    <option value="APPROVED" th:selected="${po.status == 'APPROVED'}">Approved</option>
+                                    <option value="RECEIVED" th:selected="${po.status == 'RECEIVED'}">Received</option>
+                                    <option value="CANCELLED" th:selected="${po.status == 'CANCELLED'}">Cancelled</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                            </form>
+                            <form th:action="@{/admin/purchase-orders/{id}/delete(id=${po.purchaseOrderId})}" method="post" style="display:inline;"
+                                  onsubmit="return confirm('Delete this purchase order?');">
+                                <button type="submit" class="btn btn-danger btn-sm" style="margin-top:0.4rem;">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <p style="color:var(--muted); font-size:0.75rem;">
+            Marking a purchase order "Received" automatically adds its quantity to the product's stock.
+        </p>
+    </div>
+</div>
+
+</body>
+</html>
