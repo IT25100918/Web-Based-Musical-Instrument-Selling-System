@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Request Purchase Order | Admin</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <a class="brand" th:href="@{/admin/dashboard}">
+            <span class="brand-name">Ceylon Music House</span>
+            <span class="brand-sub">Admin Console</span>
+        </a>
+        <div class="header-nav">
+            <a th:href="@{/admin/purchase-orders}">&larr; Back to list</a>
+        </div>
+    </div>
+</header>
+
+<div class="main">
+    <div class="container" style="max-width: 560px; padding-top: 2rem;">
+        <div class="form-card">
+            <div class="page-title" style="font-size:1.5rem; margin-bottom:1.5rem;">Request Purchase Order</div>
+
+            <form th:action="@{/admin/purchase-orders}" method="post">
+                <div class="form-group">
+                    <label class="form-label">Supplier</label>
+                    <select name="supplierId" class="form-input" required>
+                        <option th:each="s : ${suppliers}" th:value="${s.supplierId}" th:text="${s.name}">Supplier</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Product</label>
+                    <select name="productId" class="form-input" required>
+                        <option th:each="p : ${products}" th:value="${p.productId}" th:text="${p.name}"
+                                th:selected="${preselectedProductId != null and preselectedProductId == p.productId}">Product</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Quantity</label>
+                    <input type="number" name="quantity" max="100000" class="form-input" min="1" required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
