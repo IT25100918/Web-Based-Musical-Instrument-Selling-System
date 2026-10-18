@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Terms &amp; Conditions | Ceylon Music House</title>
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+</head>
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-name">Ceylon Music House</span>
+            <span class="brand-sub">Fine Instruments &amp; Sound</span>
+        </a>
+        <nav class="header-nav">
+            <a th:href="@{/}">Home</a>
+            <a th:href="@{/products}">Shop</a>
+            <a th:if="${loggedInUser != null}" th:href="@{/orders}">Orders</a>
+            <a class="cart-badge" th:href="@{/cart}">Cart</a>
+        </nav>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+            <a th:if="${loggedInUser == null}" th:href="@{/login}" class="btn btn-outline btn-sm">Sign In</a>
+            <a th:if="${loggedInUser != null}" th:href="@{/profile}" class="btn btn-outline btn-sm">My Profile</a>
+            <a th:if="${role != null and role != 'CUSTOMER'}" th:href="@{/admin/dashboard}" class="btn btn-outline btn-sm">Dashboard</a>
+        </div>
+    </div>
+</header>
+
+<div class="main">
+    <div class="container" style="max-width: 800px;">
+        <div class="page-header">
+            <div><div class="page-title">Terms &amp; Conditions</div><div class="page-sub">Last updated July 2026</div></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-body" style="line-height:1.8; font-size:0.9rem; color:var(--text);">
+                <h3 style="color:var(--gold-light); margin-bottom:0.5rem;">1. Using our store</h3>
+                <p style="margin-bottom:1.2rem;">By creating an account or placing an order with Ceylon Music House, you agree to provide accurate information, keep your login credentials secure, and use the site only for lawful purchases.</p>
+
+                <h3 style="color:var(--gold-light); margin-bottom:0.5rem;">2. Orders and pricing</h3>
+                <p style="margin-bottom:1.2rem;">All prices are shown in Sri Lankan Rupees (LKR) and may change without notice. We reserve the right to cancel or refuse any order, including in cases of pricing errors or stock unavailability, in which case any payment already taken will be refunded.</p>
+
+                <h3 style="color:var(--gold-light); margin-bottom:0.5rem;">3. Payment</h3>
+                <p style="margin-bottom:1.2rem;">Payments are processed securely at checkout. You confirm that any payment details you provide belong to you or that you are authorized to use them.</p>
+
+                <h3 style="color:var(--gold-light); margin-bottom:0.5rem;">4. Delivery</h3>
+                <p style="margin-bottom:1.2rem;">Estimated delivery dates are provided in good faith but are not guaranteed. Risk of loss passes to you once an order is marked delivered.</p>
+
+                <h3 style="color:var(--gold-light); margin-bottom:0.5rem;">5. Reviews</h3>
+                <p style="margin-bottom:1.2rem;">Reviews may only be submitted by customers who purchased the item. Reviews must be honest, relevant, and free of offensive content; we may remove reviews that violate this policy.</p>
+
+                <h3 style="color:var(--gold-light); margin-bottom:0.5rem;">6. Returns and refunds</h3>
+                <p style="margin-bottom:1.2rem;">Refunds are handled on a case-by-case basis through our support team. Contact us via the <a th:href="@{/contact}" style="color:var(--gold);">Contact page</a> to start a return.</p>
+
+                <h3 style="color:var(--gold-light); margin-bottom:0.5rem;">7. Changes to these terms</h3>
+                <p>We may update these terms from time to time. Continued use of the site after changes constitutes acceptance of the updated terms.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="copyright">&copy; 2026 Ceylon Music House — The Home of Music. All Rights Reserved.</div>
+</footer>
+
+</body>
+</html>
